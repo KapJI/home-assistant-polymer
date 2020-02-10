@@ -25,20 +25,15 @@ class HaLogbook extends LitElement {
   // @ts-ignore
   private _rtl = false;
 
-  protected updated(changedProps: PropertyValues) {
-    super.updated(changedProps);
-    if (!changedProps.has("hass")) {
-      return;
+  protected shouldUpdate(changedProps: PropertyValues) {
+    const oldRtl = this._rtl;
+    if (changedProps.has("hass")) {
+      const oldHass = changedProps.get("hass") as HomeAssistant | undefined;
+      if (oldHass && oldHass.language !== this.hass.language) {
+        this._rtl = computeRTL(this.hass);
+      }
     }
-    const oldHass = changedProps.get("hass") as HomeAssistant | undefined;
-    if (oldHass && oldHass.language !== this.hass.language) {
-      this._rtl = computeRTL(this.hass);
-    }
-  }
-
-  protected firstUpdated(changedProps: PropertyValues) {
-    super.firstUpdated(changedProps);
-    this._rtl = computeRTL(this.hass);
+    return changedProps.has("entries") || oldRtl !== this._rtl;
   }
 
   protected render(): TemplateResult {
